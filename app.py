@@ -30,7 +30,7 @@ import nltk
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
-data_filepath = '../data/'
+data_filepath = 'data/'
 df = pd.read_csv(data_filepath+'clean_job_postings_w_salary.csv')
 salary_COL = pd.read_csv(data_filepath+"salary_cost_of_living.csv")
 
@@ -41,7 +41,8 @@ jobs=['Data Scientist', 'Data Analyst', 'Data Engineer', 'Machine Learning Engin
 with st.sidebar:
     choose = option_menu("Main Menu", ["About", 
                                        "Analysing Job Market", 
-                                       "Salary Estimator", 
+                                       "Salary Estimator",
+                                       "Job Recommender", 
                                        "Contact"],
                          icons=['house',
                                 'app-indicator', 
@@ -130,6 +131,39 @@ elif choose=='Salary Estimator':
     with col1:
         selected_job = st.selectbox("Select your ideal job position", 
                                     jobs, index = 0)
+
+elif choose=='Job Recommender':
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    input_skills = st.text_input("Enter skills (comma-separated):")
+    selected_skills = [skill.strip() for skill in input_skills.split(',')]
+    selected_areas = st.text_input("Input two areas of interest where you would like to work (comma-separated)")
+    selected_areas = [area.strip() for area in selected_areas.split(',')]
+
+    postings = pd.read_csv("data/clean_job_postings_w_salary.csv").drop(columns = ["Unnamed: 0"])
+    skills_lang = postings[['skills', 'programming_languages', 'location']]
+
+    def augment_skills_location(row):
+        eval_lang = eval(row['programming_languages'])
+        eval_skills = eval(row['skills'])
+        lang_str = ' '.join(eval_lang)
+        skills_str = ' '.join(eval_skills)
+        return lang_str + ' ' + skills_str + " " + row['location'].lower()
+
+    skills_lang['joined_skills'] = skills_lang.apply(augment_skills_location, axis = 1)
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(skills_lang['joined_skills'])
+    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+    from recommender_system import recommend
+
+    df = recommend(selected_skills, selected_areas, cosine_sim, postings)
+    df.columns = ["Job Title", "Location", "Description", "Estimated Salary", "Rating"]
+    df = df.reset_index().drop(columns = ['index'])
+    st.header("Here is a table of recommended jobs that you should check out based on your skills and areas of interest:")
+    st.dataframe(df)
+
+
 
 
 
