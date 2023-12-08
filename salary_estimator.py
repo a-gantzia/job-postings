@@ -36,8 +36,6 @@ def predict_salary_range(data_input):
 
     input_data = {}
 
-    df["prog_langs"] = df["prog_lang"].apply(lambda x: x.strip().split(","))
-    df["skills"] = df["skills"].apply(lambda x: x.strip().split(","))
     for col in cols:
         input_data[col] = 0
 
@@ -86,13 +84,13 @@ def predict_salary_range(data_input):
         if df["size"].values[0] == size:
             input_data["company_revenue_encoded"] = i
 
-    for lang in df["prog_langs"].values[0]:
+    for lang in df["prog_lang"].values[0]:
         input_data[lang] = 1
 
     for skill in df["skills"].values[0]:
         input_data[skill] = 1
 
-    input_data['num_of_programming_languages'] = len(df["prog_langs"].values[0])
+    input_data['num_of_programming_languages'] = len(df["prog_lang"].values[0])
     input_data['num_of_skills'] = len(df["skills"].values[0])
 
 

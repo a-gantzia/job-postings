@@ -127,12 +127,19 @@ elif choose == "Contact":
             st.write('Thanks for your contacting us. We will respond to your questions or inquiries as soon as possible!')
         
 elif choose=='Salary Estimator':
+
+    with open("skills_final.pkl", "rb") as fd:
+        skills_final = pickle.load(fd)
+    with open("prog_lang.pkl", "rb") as fd:
+        prog_lang_final = pickle.load(fd)
     st.markdown(style1, unsafe_allow_html=True)
     st.markdown('<p class="font">Salary Estimator</p>', unsafe_allow_html=True)
     input_data = {}
 
-    input_data['skills'] = st.text_input("Enter skills (comma-separated):")
-    input_data['prog_lang'] = st.text_input("Enter programming languages (comma-separated):")
+    input_data["skills"] = st.multiselect("Skills", skills_final, placeholder="Select your skills")
+    input_data["prog_lang"] = st.multiselect("Programming languages", prog_lang_final, placeholder="Select your programming languages")
+    # input_data['skills'] = st.text_input("Enter skills (comma-separated):")
+    # input_data['prog_lang'] = st.text_input("Enter programming languages (comma-separated):")
     input_data['seniority'] = st.selectbox("Select seniority level", ["Junior", "Mid", "Senior"], index=0)
     categories = ['location', 'company_type', 'job_category', 'company_sector', 'company_industry']
     for category in categories: 
@@ -152,13 +159,6 @@ elif choose=='Salary Estimator':
     predicted_range = predict_salary_range(input_data)
     st.markdown(style1, unsafe_allow_html=True)
     st.markdown(f'<p class="font">{predicted_range}</p>', unsafe_allow_html=True)
-
-
-
-    
-    
-    # col1, col2 = st.columns( [0.5, 0.5])
-    # with col1:
 
 elif choose=='Job Recommender':
     from sklearn.feature_extraction.text import TfidfVectorizer
