@@ -19,6 +19,8 @@ import string
 from  PIL import Image
 import requests
 from pathlib import Path
+from salary_estimator import predict_salary_range
+
 
 from io import BytesIO
 import collections
@@ -127,10 +129,36 @@ elif choose == "Contact":
 elif choose=='Salary Estimator':
     st.markdown(style1, unsafe_allow_html=True)
     st.markdown('<p class="font">Salary Estimator</p>', unsafe_allow_html=True)
-    col1, col2 = st.columns( [0.5, 0.5])
-    with col1:
-        selected_job = st.selectbox("Select your ideal job position", 
-                                    jobs, index = 0)
+    input_data = {}
+
+    input_data['skills'] = st.text_input("Enter skills (comma-separated):")
+    input_data['prog_lang'] = st.text_input("Enter programming languages (comma-separated):")
+    input_data['seniority'] = st.selectbox("Select seniority level", ["Junior", "Mid", "Senior"], index=0)
+    categories = ['location', 'company_type', 'job_category', 'company_sector', 'company_industry']
+    for category in categories: 
+        with open(category + '.pkl', "rb") as fd:
+            temp = pickle.load(fd)
+        input_data[category] = st.selectbox("Select " +  category, temp, index=0)
+    input_data["size"] = st.selectbox("Select company size", ['1 to 50 Employees',
+                                                            '51 to 200 Employees',
+                                                            '201 to 500 Employees',
+                                                            '501 to 1000 Employees',
+                                                            '1001 to 5000 Employees',
+                                                            '5001 to 10000 Employees',
+                                                            '10000+ Employees',
+                                                            'Unknown'], index = 0)
+    
+
+    predicted_range = predict_salary_range(input_data)
+    st.markdown(style1, unsafe_allow_html=True)
+    st.markdown(f'<p class="font">{predicted_range}</p>', unsafe_allow_html=True)
+
+
+
+    
+    
+    # col1, col2 = st.columns( [0.5, 0.5])
+    # with col1:
 
 elif choose=='Job Recommender':
     from sklearn.feature_extraction.text import TfidfVectorizer
